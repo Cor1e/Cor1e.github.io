@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.ico?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.ico?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Cor1e's blog" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助">
+<meta name="keywords" content="搭建静态博客">
+<meta property="og:type" content="article">
+<meta property="og:title" content="部署在github上的hexo博客 0">
+<meta property="og:url" content="https://cor1e.cn/2019/10/03/1/index.html">
+<meta property="og:site_name" content="Cor1e&#39;s blog">
+<meta property="og:description" content="-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/RPYWcadi3s2NErw.jpg">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/n7WqwAlditRP5zB.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/p57JnVYlsiAK2Dz.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/batLEHplsqh1xvw.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/3rT74vAemlxUQsK.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/bzfh37VSJojqd1c.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/lhutFHqR9xVQACY.png">
+<meta property="og:image" content="https://i.loli.net/2019/10/03/4FYb5URwLohPfQA.png">
+<meta property="og:updated_time" content="2021-05-07T04:21:17.968Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="部署在github上的hexo博客 0">
+<meta name="twitter:description" content="-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助">
+<meta name="twitter:image" content="https://i.loli.net/2019/10/03/RPYWcadi3s2NErw.jpg">
+  <link rel="canonical" href="https://cor1e.cn/2019/10/03/1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>部署在github上的hexo博客 0 | Cor1e's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cor1e's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">be patient and explore</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="fa fa-search fa-fw"></i>搜索</a>
+      </li>
+    
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input" id="search-input"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+  
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="https://cor1e.cn/2019/10/03/1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Cor1e">
+      <meta itemprop="description" content="record">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cor1e's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">部署在github上的hexo博客 0
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2019-10-03 04:25:20" itemprop="dateCreated datePublished" datetime="2019-10-03T04:25:20+08:00">2019-10-03</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-07 12:21:17" itemprop="dateModified" datetime="2021-05-07T12:21:17+08:00">2021-05-07</time>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助"><a href="#1-以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助" class="headerlink" title="-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助"></a>-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助</h2><a id="more"></a><h2 id="0-前期准备"><a href="#0-前期准备" class="headerlink" title="0.前期准备"></a>0.前期准备</h2><h3 id="0-1-安装Git"><a href="#0-1-安装Git" class="headerlink" title="0.1.安装Git"></a>0.1.安装Git</h3><p>我用windows,因为到git官网下速度狠感人，搜索’git下载国内镜像地址’得到它。</p>
+<p>下载安装完后就会有一个Git Bash命令行工具，以后用这个工具来使用git。(就可以不一定要用cmd了哦)</p>
+<h3 id="0-2-安装nodeJS"><a href="#0-2-安装nodeJS" class="headerlink" title="0.2.安装nodeJS"></a>0.2.安装nodeJS</h3><p>Hexo是基于nodeJS编写的，所以需要安装一下nodeJs和里面的npm工具。</p>
+<p>windows:</p>
+<p>选择LTS版本就行</p>
+<p>安装完后打开命令行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+
+<p>检查一下有没有安装成功</p>
+<h3 id="0-3-安装hexo"><a href="#0-3-安装hexo" class="headerlink" title="0.3.安装hexo"></a>0.3.安装hexo</h3><p>前面git和nodejs安装好后，就可以安装hexo了，你可以先创建一个文件夹blog（随便叫什么都行），然后<code>cd</code>到这个文件夹下（或者在这个文件夹下直接右键git bash打开）。</p>
+<p>输入命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<p>用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo -v</span><br></pre></td></tr></table></figure>
+
+<p>查看版本</p>
+<p>安装完毕</p>
+<p>接下来初始化一下hexo</p>
+<p>cd到你创建的blog文件夹下</p>
+<p>输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init</span><br></pre></td></tr></table></figure>
+
+<p>然后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>新建完成后，指定文件夹目录下有：</p>
+<ul>
+<li>node_modules: 依赖包</li>
+<li>public：存放生成的页面</li>
+<li>scaffolds：生成文章的一些模板</li>
+<li>source：用来存放你的文章</li>
+<li>themes：主题</li>
+<li>_config.yml: 博客的配置文件</li>
+</ul>
+<p>（吧啦吧啦</p>
+<p>然后（后续操作都要在你创建的blog文件夹下完成哦</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo generate(用hexo g命令也行)</span><br><span class="line">hexo server(用hexo s命令也行)</span><br></pre></td></tr></table></figure>
+
+<p>现在我们打开了hexo的服务，在浏览器输入localhost:4000就可以看到差不多如下页面</p>
+<p><img src="https://i.loli.net/2019/10/03/RPYWcadi3s2NErw.jpg" alt="hd.jpg"></p>
+<h3 id="0-4-GitHub创建仓库"><a href="#0-4-GitHub创建仓库" class="headerlink" title="0.4.GitHub创建仓库"></a>0.4.GitHub创建仓库</h3><p>创建一个和你用户名相同的仓库，后面加.<a href="https://link.zhihu.com/?target=http%3A//github.io" target="_blank" rel="noopener">http://github.io</a>，只有这样，将来要部署到GitHub page的时候，才会被识别，也就是<a href="https://link.zhihu.com/?target=http%3A//xxxx.github.io" target="_blank" rel="noopener">http://xxxx.github.io</a>，其中xxx就是你注册GitHub的用户名。我这里是已经建过了。</p>
+<p><img src="https://i.loli.net/2019/10/03/n7WqwAlditRP5zB.png" alt="051617.png"></p>
+<p>点击create repository。</p>
+<h3 id="0-5-生成SSH添加到GitHub"><a href="#0-5-生成SSH添加到GitHub" class="headerlink" title="0.5. 生成SSH添加到GitHub"></a>0.5. 生成SSH添加到GitHub</h3><p>回到你的git bash中，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global user.name &quot;yourname&quot;</span><br><span class="line">git config --global user.email &quot;youremail&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这里的yourname输入你的GitHub用户名，youremail输入你GitHub的邮箱。这样GitHub才能知道你是不是对应它的账户。</p>
+<p>可以用以下两条，检查一下你有没有输对</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config user.name</span><br><span class="line">git config user.email</span><br></pre></td></tr></table></figure>
+
+<p>然后创建SSH,一路回车</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -C &quot;youremail&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这个时候它会告诉你已经生成了.ssh的文件夹。在你的电脑中找到这个文件夹。</p>
+<p>ssh，简单来讲，就是一个秘钥，其中，<code>id_rsa</code>是你这台电脑的私人秘钥，不能给别人看的，<code>id_rsa.pub</code>是公共秘钥，可以随便给别人看。把这个公钥放在GitHub上，这样当你链接GitHub自己的账户时，它就会根据公钥匹配你的私钥，当能够相互匹配时，才能够顺利的通过git上传你的文件到GitHub上。</p>
+<p>而后在GitHub的setting中，找到SSH keys的设置选项，点击<code>New SSH key</code> 把你的<code>id_rsa.pub</code>里面的信息复制进去。</p>
+<p><img src="https://i.loli.net/2019/10/03/p57JnVYlsiAK2Dz.png" alt="054558.png"></p>
+<p>在gitbash中，查看是否成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -T git@github.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="0-6-将hexo部署到GitHub"><a href="#0-6-将hexo部署到GitHub" class="headerlink" title="0.6.将hexo部署到GitHub"></a>0.6.将hexo部署到GitHub</h3><p>这一步，我们就可以将hexo和GitHub关联起来，也就是将hexo生成的文章部署到GitHub上，打开站点配置文件 <code>_config.yml</code>，翻到最后，修改为 YourgithubName就是你的GitHub账户（我的githubName即为Cor1e)</p>
+<p><img src="https://i.loli.net/2019/10/03/batLEHplsqh1xvw.png" alt="052421.png"></p>
+<p>也别忘了改url（这其实显然是。。。买完域名之后的操作。随便啦先讲了也行⑧）</p>
+<p><img src="https://i.loli.net/2019/10/03/3rT74vAemlxUQsK.png" alt="052313.png"></p>
+<p>这个时候需要先安装deploy-git ，也就是部署的命令,这样你才能用命令部署到GitHub。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<p>然后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo generate</span><br><span class="line">hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p><code>hexo generate</code>生成静态文章，可以用 <code>hexo g</code>缩写 <code>hexo deploy</code> 部署文章，可以用<code>hexo d</code>缩写</p>
+<p>注意deploy时可能要你输入username和password。</p>
+<p>过一会儿就可以在<code>http://yourname.github.io</code> 这个网站看到你的博客了！！ </p>
+<h3 id="0-7-设置个人域名"><a href="#0-7-设置个人域名" class="headerlink" title="0.7. 设置个人域名"></a>0.7. 设置个人域名</h3><p>现在你的个人网站的地址是 <code>yourname.github.io</code>，如果觉得这个网址逼格不太够，这就需要你设置个人域名了。但是需要花钱。</p>
+<p>注册一个阿里云账户,在<a href="https://link.zhihu.com/?target=https%3A//wanwang.aliyun.com/%3Fspm%3D5176.8142029.digitalization.2.e9396d3e46JCc5" target="_blank" rel="noopener">阿里云</a>上买一个域名，我买的是 cor1e.cn</p>
+<p>你需要先去进行实名认证,然后在域名控制台中，看到你购买的域名。</p>
+<p>点<strong>解析</strong>进去，添加解析。</p>
+<p><img src="https://i.loli.net/2019/10/03/bzfh37VSJojqd1c.png" alt="053059.png"></p>
+<p>登录GitHub，进入之前创建的仓库，点击settings，设置Custom domain，输入你的域名cor1e.cn</p>
+<p><img src="https://i.loli.net/2019/10/03/lhutFHqR9xVQACY.png" alt="053311.png"></p>
+<p>然后在你的博客文件source中创建一个名为CNAME文件，不要后缀。写上你的域名。</p>
+<p><img src="https://i.loli.net/2019/10/03/4FYb5URwLohPfQA.png" alt="053459.png"></p>
+<p>最后，在gitbash中，输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">注：</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br><span class="line">这两行命令可以用</span><br><span class="line">hexo g -d</span><br><span class="line">替代哦</span><br></pre></td></tr></table></figure>
+
+<p>过不了多久，再打开你的浏览器，输入你自己的域名，就可以看到搭建的网站啦！</p>
+<p>接下来你就可以正式开始写文章了。</p>
+<p>要创建新的博文，请cd到你创建的blog文件夹的source\ _posts文件夹下</p>
+<p>输入命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new newpapername（newpapername是你想创建的markdown文件名）</span><br></pre></td></tr></table></figure>
+
+<p>然后在source/_post中打开markdown文件，就可以开始编辑了。当你写完的时候，再</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
+
+<h2 id="前期准备到这就差不多做好了，后面写如何个性化博客界面"><a href="#前期准备到这就差不多做好了，后面写如何个性化博客界面" class="headerlink" title="前期准备到这就差不多做好了，后面写如何个性化博客界面"></a>前期准备到这就差不多做好了，后面写如何个性化博客界面</h2>
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/搭建静态博客/" rel="tag"># 搭建静态博客</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2019/10/03/2/" rel="prev" title="部署在github上的hexo博客 1">
+                  部署在github上的hexo博客 1 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    
+  <div class="comments" id="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC80NjkyMi8yMzQyMw=="></div>
+  </div>
+  
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助"><span class="nav-number">1.</span> <span class="nav-text">-1.以下内容多为拾人牙慧所得，感谢Reverier大佬的帮助</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0-前期准备"><span class="nav-number">2.</span> <span class="nav-text">0.前期准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-1-安装Git"><span class="nav-number">2.1.</span> <span class="nav-text">0.1.安装Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-2-安装nodeJS"><span class="nav-number">2.2.</span> <span class="nav-text">0.2.安装nodeJS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-3-安装hexo"><span class="nav-number">2.3.</span> <span class="nav-text">0.3.安装hexo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-4-GitHub创建仓库"><span class="nav-number">2.4.</span> <span class="nav-text">0.4.GitHub创建仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-5-生成SSH添加到GitHub"><span class="nav-number">2.5.</span> <span class="nav-text">0.5. 生成SSH添加到GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-6-将hexo部署到GitHub"><span class="nav-number">2.6.</span> <span class="nav-text">0.6.将hexo部署到GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-7-设置个人域名"><span class="nav-number">2.7.</span> <span class="nav-text">0.7. 设置个人域名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前期准备到这就差不多做好了，后面写如何个性化博客界面"><span class="nav-number">3.</span> <span class="nav-text">前期准备到这就差不多做好了，后面写如何个性化博客界面</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cor1e</p>
+  <div class="site-description" itemprop="description">record</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/Cor1e" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;Cor1e" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:carolercheng@outlook.com" title="E-Mail &amp;rarr; mailto:carolercheng@outlook.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://eqqie.cn/" title="https:&#x2F;&#x2F;eqqie.cn&#x2F;" rel="noopener" target="_blank">🐧❤</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://www.wootec.top/" title="https:&#x2F;&#x2F;www.wootec.top&#x2F;" rel="noopener" target="_blank">Reverier</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://shal10w.github.io/" title="https:&#x2F;&#x2F;shal10w.github.io&#x2F;" rel="noopener" target="_blank">shallow</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://arttnba3.cn/" title="https:&#x2F;&#x2F;arttnba3.cn&#x2F;" rel="noopener" target="_blank">arttnba3</a>
+        </li>
+      
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cor1e</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/pisces.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.css">
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.js"></script><script src="/js/algolia-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<script>
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+</body>
+</html>
