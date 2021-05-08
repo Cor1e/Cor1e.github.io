@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.ico?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.ico?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+  <link rel="alternate" href="/atom.xml" title="Cor1e's blog" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：">
+<meta name="keywords" content="glibc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="glibc的TLS实现中的相关结构体浅析">
+<meta property="og:url" content="https://cor1e.cn/2021/05/07/tls/index.html">
+<meta property="og:site_name" content="Cor1e&#39;s blog">
+<meta property="og:description" content="通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gGx5VJ.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gGx0bQ.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gGxYCt.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gJSNnS.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gJSa7Q.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gJ9RY9.png">
+<meta property="og:image" content="https://z3.ax1x.com/2021/05/08/gJ9hS1.png">
+<meta property="og:updated_time" content="2021-05-08T12:40:32.286Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="glibc的TLS实现中的相关结构体浅析">
+<meta name="twitter:description" content="通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：">
+<meta name="twitter:image" content="https://z3.ax1x.com/2021/05/08/gGx5VJ.png">
+  <link rel="canonical" href="https://cor1e.cn/2021/05/07/tls/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>glibc的TLS实现中的相关结构体浅析 | Cor1e's blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cor1e's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">be patient and explore</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="fa fa-search fa-fw"></i>搜索</a>
+      </li>
+    
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input" id="search-input"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+  
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="https://cor1e.cn/2021/05/07/tls/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Cor1e">
+      <meta itemprop="description" content="record">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cor1e's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">glibc的TLS实现中的相关结构体浅析
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2021-05-07 00:00:00" itemprop="dateCreated datePublished" datetime="2021-05-07T00:00:00+08:00">2021-05-07</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-08 20:40:32" itemprop="dateModified" datetime="2021-05-08T20:40:32+08:00">2021-05-08</time>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h5 id="通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体："><a href="#通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：" class="headerlink" title="通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体："></a>通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：</h5><a id="more"></a><p>代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_t</span> ntid;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">thr_fn</span><span class="params">(<span class="keyword">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> a;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"new thread:\n"</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%c"</span>,&amp;a);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> err;</span><br><span class="line">    err = pthread_create(&amp;ntid,<span class="literal">NULL</span>,thr_fn,<span class="literal">NULL</span>);</span><br><span class="line">    pthread_join(ntid,<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"main thread:\n"</span>);</span><br><span class="line">    <span class="keyword">char</span> b;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">" %c"</span>,&amp;b);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="首先在main下断点，进入主线程："><a href="#首先在main下断点，进入主线程：" class="headerlink" title="首先在main下断点，进入主线程："></a>首先在main下断点，进入主线程：</h4><p><a href="https://imgtu.com/i/gGx5VJ" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gGx5VJ.png" alt="gGx5VJ.png"></a></p>
+<p>在<code>X86</code>中<code>TLS</code>由<code>FS</code>寄存器(通常由运行时代码或线程库管理)指向，<code>TLS</code>在<code>glibc</code>中的实现为<code>tcbhead_t(TCB)</code>结构体，其定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="keyword">void</span> *tcb;                <span class="comment">/* Pointer to the TCB.  Not necessarily the</span></span><br><span class="line"><span class="comment">                           thread descriptor used by libpthread.  */</span></span><br><span class="line">  <span class="keyword">dtv_t</span> *dtv;</span><br><span class="line">  <span class="keyword">void</span> *self;                <span class="comment">/* Pointer to the thread descriptor.  */</span></span><br><span class="line">  <span class="keyword">int</span> multiple_threads;</span><br><span class="line">  <span class="keyword">int</span> gscope_flag;</span><br><span class="line">  <span class="keyword">uintptr_t</span> sysinfo;</span><br><span class="line">  <span class="keyword">uintptr_t</span> stack_guard;</span><br><span class="line">  <span class="keyword">uintptr_t</span> pointer_guard;</span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">int</span> vgetcpu_cache[<span class="number">2</span>];</span><br><span class="line">  <span class="comment">/* Bit 0: X86_FEATURE_1_IBT.</span></span><br><span class="line"><span class="comment">     Bit 1: X86_FEATURE_1_SHSTK.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> feature_1;</span><br><span class="line">  <span class="keyword">int</span> __glibc_unused1;</span><br><span class="line">  <span class="comment">/* Reservation of some values for the TM ABI.  */</span></span><br><span class="line">  <span class="keyword">void</span> *__private_tm[<span class="number">4</span>];</span><br><span class="line">  <span class="comment">/* GCC split stack support.  */</span></span><br><span class="line">  <span class="keyword">void</span> *__private_ss;</span><br><span class="line">  <span class="comment">/* The lowest address of shadow stack,  */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="keyword">int</span> ssp_base;</span><br><span class="line">  <span class="comment">/* Must be kept even if it is no longer used by glibc since programs,</span></span><br><span class="line"><span class="comment">     like AddressSanitizer, depend on the size of tcbhead_t.  */</span></span><br><span class="line">  __128bits __glibc_unused2[<span class="number">8</span>][<span class="number">4</span>] __attribute__ ((aligned (<span class="number">32</span>)));</span><br><span class="line">  <span class="keyword">void</span> *__padding[<span class="number">8</span>];</span><br><span class="line">&#125; <span class="keyword">tcbhead_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>查看主线程的<code>$fs_base</code>（在保护模式下<code>$fs</code>为空值，需查看每个线程的<code>$fs_base</code>）<code>=0x7ffff7d9f740</code></p>
+<p><a href="https://imgtu.com/i/gGx0bQ" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gGx0bQ.png" alt="gGx0bQ.png"></a></p>
+<p>动态链接器完成内存映射后将调用<code>init_tls</code>等一系列函数来初始化主线程的静态<code>TLS</code>和<code>DTV</code>，由上面<code>vmmap</code>的结果可知此时<code>TLS</code>结构体<code>(TCB)</code>被分配在<code>mmap</code>段。</p>
+<p>其中<code>dtv</code>部分指向一个类型为<code>dtv_t</code>的数组的第二个元素，该结构体的定义为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">union</span> dtv &#123;</span><br><span class="line">	<span class="keyword">size_t</span> counter;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">		<span class="keyword">void</span>* val;</span><br><span class="line">		<span class="keyword">bool</span> is_static;</span><br><span class="line">	&#125; pointer;</span><br><span class="line">&#125; <span class="keyword">dtv_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>dtv</code>数组前两个元素具有特定功能，如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dtv[<span class="number">0</span>].counter; <span class="comment">/* Pro tip: The length of this dtv array */</span></span><br><span class="line">dtv[<span class="number">1</span>].counter;  <span class="comment">/* Generation counter for the DTV in this thread */</span></span><br><span class="line">dtv[<span class="number">2</span>].pointer;  <span class="comment">/* Pointer to the main executable TLS block in this thread */</span></span><br></pre></td></tr></table></figure>
+
+<p>查看主线程的<code>dtv</code>：</p>
+<p><a href="https://imgtu.com/i/gGxYCt" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gGxYCt.png" alt="gGxYCt.png"></a></p>
+<p>可见主线程<code>dtv</code>数组大小为<code>0xf</code>，<code>TLS</code>块的数量为1，第三个元素<code>0x7ffff7d9f6b0</code>指向<code>TLS</code>块<code>（0x7ffff7d9f740）-0x90</code>的位置</p>
+<h4 id="接着在子线程的执行scanf前下了断点，进入子线程查看："><a href="#接着在子线程的执行scanf前下了断点，进入子线程查看：" class="headerlink" title="接着在子线程的执行scanf前下了断点，进入子线程查看："></a>接着在子线程的执行scanf前下了断点，进入子线程查看：</h4><p><a href="https://imgtu.com/i/gJSNnS" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJSNnS.png" alt="gJSNnS.png"></a></p>
+<p><a href="https://imgtu.com/i/gJSa7Q" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJSa7Q.png" alt="gJSa7Q.png"></a></p>
+<p>可以看出子线程的栈和<code>TCB</code>都被分配在<code>mmap</code>段（相关的知识我还不太懂，需要读<code>pthread_creat</code>源码），此处由<code>pthread_creat</code>源码中的<code>__pthread_create_2_1-&gt;allocate_stack-&gt;_dl_allocate_tls</code>函数知知子线程的<code>dtv</code>由<code>calloc</code>分配，如下图：</p>
+<p><a href="https://imgtu.com/i/gJ9RY9" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJ9RY9.png" alt="gJ9RY9.png"></a></p>
+<p><a href="https://imgtu.com/i/gJ9hS1" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJ9hS1.png" alt="gJ9hS1.png"></a></p>
+<p>大概了解到这里，后续再学习。</p>
+<blockquote>
+<p>参考文章：<a href="https://chao-tic.github.io/blog/2018/12/25/tls" target="_blank" rel="noopener">A Deep dive into (implicit) Thread Local Storage (chao-tic.github.io)</a>（写得很好，但是我英语不好很多读不太懂，推荐阅读）</p>
+<p><a href="https://blog.csdn.net/conansonic/article/details/77487925" target="_blank" rel="noopener">pthread_create源码分析_conansonic的博客-CSDN博客</a></p>
+<p><a href="https://code.woboq.org/userspace/glibc" target="_blank" rel="noopener">https://code.woboq.org/userspace/glibc</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/glibc/" rel="tag"># glibc</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2020/07/24/something/" rel="next" title="笔记">
+                  <i class="fa fa-chevron-left"></i> 笔记
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    
+  <div class="comments" id="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC80NjkyMi8yMzQyMw=="></div>
+  </div>
+  
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体："><span class="nav-number">1.</span> <span class="nav-text">通过一个几行代码的示例来浅层地观察一下glibc的TLS实现中的结构体：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#首先在main下断点，进入主线程："><span class="nav-number"></span> <span class="nav-text">首先在main下断点，进入主线程：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接着在子线程的执行scanf前下了断点，进入子线程查看："><span class="nav-number"></span> <span class="nav-text">接着在子线程的执行scanf前下了断点，进入子线程查看：</span></a></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cor1e</p>
+  <div class="site-description" itemprop="description">record</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/Cor1e" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;Cor1e" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:carolercheng@outlook.com" title="E-Mail &amp;rarr; mailto:carolercheng@outlook.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://eqqie.cn/" title="https:&#x2F;&#x2F;eqqie.cn&#x2F;" rel="noopener" target="_blank">🐧❤</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://www.wootec.top/" title="https:&#x2F;&#x2F;www.wootec.top&#x2F;" rel="noopener" target="_blank">Reverier</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://shal10w.github.io/" title="https:&#x2F;&#x2F;shal10w.github.io&#x2F;" rel="noopener" target="_blank">shallow</a>
+        </li>
+      
+        <li class="links-of-blogroll-item">
+          <a href="https://arttnba3.cn/" title="https:&#x2F;&#x2F;arttnba3.cn&#x2F;" rel="noopener" target="_blank">arttnba3</a>
+        </li>
+      
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cor1e</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/pisces.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.css">
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.js"></script><script src="/js/algolia-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<script>
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+</body>
+</html>
