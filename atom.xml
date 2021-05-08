@@ -38,30 +38,6 @@
   </entry>
   
   <entry>
-    <title>笔记</title>
-    <link href="https://cor1e.cn/2020/07/24/something/"/>
-    <id>https://cor1e.cn/2020/07/24/something/</id>
-    <published>2020-07-24T08:07:04.000Z</published>
-    <updated>2021-03-29T02:54:38.350Z</updated>
-    
-    <content type="html"><![CDATA[<h5 id="主线程和其他线程的栈位置："><a href="#主线程和其他线程的栈位置：" class="headerlink" title="主线程和其他线程的栈位置："></a>主线程和其他线程的栈位置：</h5><p>​    多线程进程可以看作是几个共享地址空间的进程的集合。但多线程一定是由一个主线程开始，这个主线程启动其他线程。主线程的线程栈在内核空间位置附近，大小为8MB，其他线程的线程栈是主线程在调用pthread_create创建线程时，由mmap分配的，所以这些线程栈在mmap的区域内，跟共享库入口同属一个区域，phtread_t tid中存储的就是线程结构体在mmap区域中的入口。普通线程栈的默认大小也是8MB，但是因为是动态分配的，所以可以在线程属性设置函数中调整线程栈的大小（主线程也可以修改栈大小。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h5 id=&quot;主线程和其他线程的栈位置：&quot;&gt;&lt;a href=&quot;#主线程和其他线程的栈位置：&quot; class=&quot;headerlink&quot; title=&quot;主线程和其他线程的栈位置：&quot;&gt;&lt;/a&gt;主线程和其他线程的栈位置：&lt;/h5&gt;&lt;p&gt;​    多线程进程可以看作是几个共享地址空间的进程
-      
-    
-    </summary>
-    
-    
-    
-      <category term="杂" scheme="https://cor1e.cn/tags/%E6%9D%82/"/>
-    
-  </entry>
-  
-  <entry>
     <title>部署在github上的hexo博客 1</title>
     <link href="https://cor1e.cn/2019/10/03/2/"/>
     <id>https://cor1e.cn/2019/10/03/2/</id>
