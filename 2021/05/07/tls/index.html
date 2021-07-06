@@ -284,7 +284,7 @@
 <p>可见主线程<code>dtv</code>数组大小为<code>0xf</code>，<code>TLS</code>块的数量为1，第三个元素<code>0x7ffff7d9f6b0</code>指向<code>TLS</code>块<code>（0x7ffff7d9f740）-0x90</code>的位置</p>
 <h4 id="接着在子线程的执行scanf前下了断点，进入子线程查看："><a href="#接着在子线程的执行scanf前下了断点，进入子线程查看：" class="headerlink" title="接着在子线程的执行scanf前下了断点，进入子线程查看："></a>接着在子线程的执行scanf前下了断点，进入子线程查看：</h4><p><a href="https://imgtu.com/i/gJSNnS" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJSNnS.png" alt="gJSNnS.png"></a></p>
 <p><a href="https://imgtu.com/i/gJSa7Q" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJSa7Q.png" alt="gJSa7Q.png"></a></p>
-<p>可以看出子线程的栈和<code>TCB</code>都被分配在<code>mmap</code>段（相关的知识我还不太懂，需要读<code>pthread_creat</code>源码），此处由<code>pthread_creat</code>源码中的<code>__pthread_create_2_1-&gt;allocate_stack-&gt;_dl_allocate_tls</code>函数知知子线程的<code>dtv</code>由<code>calloc</code>分配，如下图：</p>
+<p>可以看出子线程的栈和<code>TCB</code>都被分配在<code>mmap</code>段（相关的知识我还不太懂，需要读<code>pthread_creat</code>源码），此处由<code>pthread_creat</code>源码中的<code>__pthread_create_2_1-&gt;allocate_stack-&gt;_dl_allocate_tls</code>函数知子线程的<code>dtv</code>由<code>calloc</code>分配，如下图：</p>
 <p><a href="https://imgtu.com/i/gJ9RY9" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJ9RY9.png" alt="gJ9RY9.png"></a></p>
 <p><a href="https://imgtu.com/i/gJ9hS1" target="_blank" rel="noopener"><img src="https://z3.ax1x.com/2021/05/08/gJ9hS1.png" alt="gJ9hS1.png"></a></p>
 <p>大概了解到这里，后续再学习。</p>
@@ -373,13 +373,13 @@
             <div class="col m8 s12">
                 <h5 class="white-text">友情链接</h5>
                 
-                    <a class="social-link" href="https: //eqqie.cn/" target="_blank">🐧❤</a>
+                    <a class="social-link" href="https://eqqie.cn/" target="_blank">🐧❤</a>
                 
-                    <a class="social-link" href="https: //www.wootec.top/" target="_blank">Reverier</a>
+                    <a class="social-link" href="https://www.wootec.top/" target="_blank">Reverier</a>
                 
-                    <a class="social-link" href="https: //shal10w.github.io/" target="_blank">shallow</a>
+                    <a class="social-link" href="https://shal10w.github.io/" target="_blank">shallow</a>
                 
-                    <a class="social-link" href="https: //arttnba3.cn/" target="_blank">arttnba3</a>
+                    <a class="social-link" href="https://arttnba3.cn/" target="_blank">arttnba3</a>
                 
             </div>
             
